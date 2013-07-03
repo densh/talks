@@ -1,0 +1,133 @@
+\title{Modular Quasiquotes for Scala}
+\author{Denys Shabalin}
+\institute{\'Ecole Polytechnique F\'ed\'erale de Lausanne}
+\date{2 July 2013}
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+  \titlepage
+\end{frame}
+}
+
+\begin{frame}[fragile]
+  \Large{\textbf{Q:} What are quasiquotes?}
+
+  \visible<2->{\Large{\textbf{A:} A composable syntactical abstraction that vastly simplifies manipulation of ASTs.}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Compactness}
+  {\tabulinesep=2mm
+  \begin{tabu}{ | p{2cm} | p{9cm} |  }
+    \hline Syntax &
+      \begin{semiverbatim}
+        case class Foo(bar: Baz)
+      \end{semiverbatim} \\
+    \hline \visible<2->{AST} &
+      \visible<2->{\small{\begin{semiverbatim}
+        ClassDef(Modifiers(...), TypeName("Foo"),
+        List(), Template(List(Select(Ident(
+        TermName("scala")), TypeName("Product")),
+        Select(Ident(TermName("scala")), TypeName(
+        "Serializable"))), emptyValDef, List(
+        ValDef(Modifiers(...), TermName("bar"),
+        Ident(TypeName("Baz")), EmptyTree),
+        DefDef(Modifiers(), nme.CONSTRUCTOR,
+        List(), List(List(ValDef(Modifiers(...),
+        TermName("bar"), Ident(TypeName("Baz")),
+        EmptyTree))), TypeTree(), Block(List(
+        pendingSuperCall), Literal(Constant(())))))))
+      \end{semiverbatim}}} \\
+    \hline \visible<3->{Quasiquote} & \visible<3->{\texttt{q"case class Foo(bar: Baz)"}} \\
+    \hline
+  \end{tabu}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Composability}
+  \begin{semiverbatim}
+
+  // it's easy to combine quasiquotes
+
+  val tree = q"simple tree"
+  val another = q"if (\$tree) foo else bar"
+
+  \visible<2->{// and they can also be used to
+  // decompose trees in the same fashion
+
+  tree match \{
+    case q"\$obj.\$member" =>
+      // obj & member are now available in this scope
+  \}}
+
+  \end{semiverbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Expressiveness}
+  \begin{semiverbatim}
+  // you can splice lists of elements into a tree with
+  // the help of special cardinality annotation
+
+  val args = List(q"a", q"b")
+  q"f(..\$args)"
+
+  \visible<2->{// equivalent to
+
+  q"f(a, b)"}
+
+  \visible<3->{// and non-tree data types
+
+  val i = 0
+  q"f(\$i)"}
+  \end{semiverbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Modularity}
+  \small\begin{semiverbatim}
+  @quasiquote object \lambda \text{\{}
+    \visible<2->{sealed abstract class Tree
+    case class Abs(v: Var, body: Tree) extends Tree
+    case class App(f: Tree, arg: Tree) extends Tree
+    case class Var(name: String) extends Tree}
+
+    \visible<3->{object parse extends StdTokenParsers \{
+      \visible<4->{lexical.delimiters ++= List("(", ")", "\\", ".")
+      def main   = rep1(parens | varr | abs | hole)       ^^ App
+      def abs    = ("\\\\" ~> (varr | hole) <~ ".") ~ main) ^^ Abs
+      def varr   = ident                                  ^^ Var
+      def parens = "(" ~> main <~ ")"}
+    \}}
+  \}
+  \end{semiverbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Modularity}
+  \begin{semiverbatim}
+
+  // now we can use our custom quasiquotes to construct
+
+  import \lambda._
+
+  val id = \lambda\text{"\\x. x"}
+  val f = \lambda\text{"\\v. \$id v"}
+
+  \visible<2->{// and deconstruct our lambda-calculus trees
+
+  f match \{
+    case \lambda\text{"\\\$arg. \$body"} =>
+  \}}
+  \end{semiverbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Summary}
+  \begin{itemize}
+    \item Quasiquotes are an extremely powerful abstraction over ASTs
+    \item Primary usage is to simplify manipulation of Scala trees
+    \item However they can be generalized to arbitrary languages
+    \item Our framework derives implementations from declarative definitions
+  \end{itemize}
+\end{frame}
