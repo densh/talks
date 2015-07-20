@@ -1,5 +1,39 @@
 \newcommand{\rts}{\ \dashv\ }
 
+% eugene:
+%
+% like
+% not your typical
+% tofte talpin how to pronounce
+% {r} explain
+% merge 7, 8 or make {r} a comment
+% regions: coloring for new stuff
+% better explanatino of qualifiers (examples?)
+% better arrows for isolated+immutable picture
+% too much update/collection-cycle explanations
+% snapshot
+%   heap state -> heap address
+%   time       -> observed time
+% too much text research proposal part
+% opaque pronounciation
+% extra slides to replace questions
+%
+% dima:
+%
+% explain region open vs evidence
+% explain when region evidence is not needed
+% consider reordering reference qualifiers: swap immutable and writable
+% explain isolated-immutable reference
+% 4 nulls
+% explain RemIso
+% remiso
+% no synchronization in write barrier, not no synchronization at all
+% new slide! explain when to deallocate separate slide
+% explain _i == thread number i
+% ownership vs regions about the same?
+% comparison table message not clear
+% too much discussion summary
+
 \title{Safe Low-Overhead Memory Management for Concurrency and Parallelism}
 \author{Denys Shabalin}
 \date{21 July 2015}
@@ -186,7 +220,7 @@
 
 \begin{frame}
     \frametitle{Uniqueness and reference immutability}
-    Introduces a reference qualifiers to the C\# language:
+    Introduces reference qualifiers to the C\# language:
     \begin{itemize}
         \item \textbf{writable} T
         \item \textbf{readable} T
@@ -222,7 +256,7 @@
     \frametitle{Uniqueness and reference immutability: judgements}
     \begin{center}
     \begin{tabular}{c | c}
-    Command typing & $\Gamma \ts C \ts \Gamma$ \\
+    Command typing & $\Gamma \ts C \rts \Gamma$ \\
                    \hline
 
     Program typing & $\ts P$          \\
@@ -354,14 +388,14 @@
         \item
             No need to maintain reference counts between cycle collections.
             Out of multiple assignments \texttt{obj.slot = $v_1$, ..., $v_n$}
-            \\ only \texttt{RC($v_1$) -= 1} and \texttt{RC($v_2$) += 1}
-            are relavant.
+            \\ only \texttt{RC($v_1$) -= 1} and \texttt{RC($v_n$) += 1}
+            are relevant.
         \item
             Instead of constantly maintaining reference counts lets
             just record old value for all of the fields that changed.
         \item
-            To reclaim an object it must both have 0 ref. count and not
-            be referenced from stack or registers.
+            To reclaim an object it must both have 0 reference count and
+            not be referenced from stack or registers.
     \end{itemize}
 \end{frame}
 
@@ -389,6 +423,7 @@
 
         Procedure Collection-Cycle
         begin
+            // Stop-The-World
             Read-Current-State
             Update-Reference-Counters
             Read-Buffers
@@ -492,6 +527,7 @@
         \begin{tabular}{c | c | c | c}
                                    & Regions & Ownership & GC     \\
                                    \hline
+            Performance            & \Best   & \Best     & \Worst \\
             Predictability         & \Best   & \Best     & \Worst \\
             Notational convenience & \Worst  & \Worst    & \Best
 
