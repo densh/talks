@@ -1,0 +1,246 @@
+\title{Safe Low-Overhead Memory Management for Concurrency and Parallelism}
+\author{Denys Shabalin}
+\date{21 July 2015}
+{
+\setbeamertemplate{footline}{}
+\begin{frame}
+    \titlepage
+\end{frame}
+}
+
+
+\begin{frame}
+    \frametitle{Overview}
+    \begin{enumerate}
+        \item Region-based memory in Cyclone
+        \item Uniqueness and reference immutability for safe parallelism
+        \item An efficient on-the-fly cycle collection
+        \item Research proposal
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\LARGE Region-based memory in Cyclone} \\
+        \vspace{20pt}
+        Dan Grossman, Michael Hicks, Greg Morrisett,\\
+        Yanling Wang, Trevor Jim, James Cheney
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Safe region-based memory management}
+
+    Pioneered by M. Tofte and J.P. Talpin who explored the concept in functional
+    programming languages of the ML family.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cyclone overview}
+    \begin{itemize}
+        \item Close to C syntactically to ease porting of existing programs.
+        \item Adds tagged unions, polymorphism, \textit{regions} etc.
+        \item Guarantees memory safety via static type checking.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Regions in Cyclone}
+    \begin{verbatim}
+    void main() {
+        region r {
+            struct Point*r p = rnew(r) { 10.0, 10.0 };
+            printf("Point at (%d, %d)", p->x, p->y);
+        }
+    }
+    \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Regions in Cyclone}
+    \begin{verbatim}
+    void main() {
+        region r {
+            struct Point*r p = rnew(r) { 10.0, 10.0 };
+            printPoint<r>(p)
+        }
+    }
+
+    void printPoint<r>(Point*r p) {
+        printf("Point at (%d, %d)", p->x, p->y);
+    }
+    \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Regions in Cyclone}
+    \begin{verbatim}
+    void main() {
+        region r {
+            struct Point*r p = rnew(r) { 10.0, 10.0 };
+            printPoint<r>(p)
+        }
+    }
+
+    void printPoint<r>(Point*r p; {r}) {
+        printf("Point at (%d, %d)", p->x, p->y);
+    }
+    \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Cyclone type system: abstract syntax excerpt}
+
+    $\tau ::= \tau_1 \xrightarrow{\epsilon} \tau_2\ |
+            \ \tau * \rho\ |\ handle(\rho)\ |\ ... $
+    \\ \vspace{10pt}
+
+    $e ::= x_\rho\ |\ *e\ |\ rnew(e_1)\ e_2\ |\ ...$
+    \\ \vspace{10pt}
+
+    $s ::=  e\ |\ return\ e\ |\ s_1; s_2 |
+            \ region \langle \rho \rangle\ x_\rho\ s\ |\ ...$
+    \\ \vspace{10pt}
+
+    $\Gamma ::= \bullet\ |\ \Gamma, x_\rho: \tau$
+    \\ \vspace{10pt}
+
+    $\Delta ::= \bullet\ |\ \Delta, \alpha: \kappa$
+    \\ \vspace{10pt}
+
+    $\gamma ::= \emptyset\ |\ \gamma, \epsilon <: \rho$
+    \\ \vspace{10pt}
+
+    $\epsilon ::= \alpha_1\ \cup\ \alpha_2\ \cup \ ...\ \cup\ \alpha_n \ \cup \
+                  \{ \rho_1,\ ..., \rho_m \}$
+    \\ \vspace{10pt}
+
+    $C ::= \Gamma; \Delta; \gamma; \epsilon$
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cyclone type system: main judgments}
+
+    $\gamma \ts \epsilon \Rightarrow \rho$
+    \\ \vspace{10pt}
+
+    $\gamma \ts \epsilon_1 \Rightarrow \epsilon_2$
+    \\ \vspace{10pt}
+
+    $\Delta; \Gamma; \gamma; \epsilon \ts e: \tau$
+    \\ \vspace{10pt}
+
+    $\Delta; \Gamma; \gamma; \epsilon; \tau \ts_{stmt}\ s$
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cyclone type system: typing dereferencing}
+    \Large
+    \infrule
+    {
+        \Delta; \Gamma; \gamma; \epsilon \ts e: \tau * \rho \ \ \ \
+        \gamma \ts \epsilon \Rightarrow \rho
+    }
+    {
+        \Delta; \Gamma; \gamma; \epsilon \ts *e: \tau
+    }
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cyclone type system: typing applications}
+    \Large
+    \infrule
+    {
+        \Delta; \Gamma; \gamma; \epsilon \ts
+        e_1: \tau_2 \xrightarrow{\epsilon_1} \tau \ \
+        \Delta; \Gamma; \gamma; \epsilon \ts
+        e_2: \tau_2 \ \
+        \gamma \ts \epsilon \Rightarrow \epsilon_1
+    }
+    {
+        \Delta; \Gamma; \gamma; \epsilon \ts
+        e_1 (e_2): \tau
+    }
+\end{frame}
+
+\begin{frame}
+    \frametitle{Cyclone summary}
+
+    \begin{itemize}
+        \item Region-based memory management
+        \item Statically safe through novel type system
+        \item Safety is achieved at expense of user convenience
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\LARGE Uniqueness and reference immutability\\ for safe parallelism} \\
+        \vspace{20pt}
+        Colin S. Gordon, Matthew J. Parkinson, \\
+        Jared Parsons, Aleks Bromfield, Joe Duffy
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Uniqueness and reference immutability summary}
+    \begin{itemize}
+        \item Data-race freedom through static checking.
+        \item Annotations can also be used for memory management.
+        \item Safety comes at expense of notational overhead.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\LARGE An efficient on-the-fly cycle collection} \\
+        \vspace{20pt}
+        Harel Paz, David F. Bacon, Elliot K. Kolodner,\\
+        Erez Petrank, V. T. Rajan
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Efficient on-the-fly collection summary}
+    \begin{itemize}
+        \item Low pause times due to sliding views.
+        \item Efficient cycle collection through a single traversal.
+        \item Dynamically-sized young generation.
+        \item User conevenience at expense of added runtime complexity.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Summary}
+    \Large
+    \definecolor{alizarin}{rgb}{0.82, 0.1, 0.26}
+    \definecolor{seagreen}{rgb}{0.18, 0.55, 0.34}
+    \newcommand{\Best}{{\color{seagreen} Best}}
+    \newcommand{\Worst}{{\color{alizarin} Worst}}
+    \begin{center}
+        \begin{tabular}{c | c | c | c}
+                                   & Regions & Ownership & GC     \\
+                                   \hline
+            Performance            & \Best   & \Best     & \Worst \\
+            Predictability         & \Best   & \Best     & \Worst \\
+            Notational convenience & \Worst  & \Worst    & \Best
+
+        \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        {\LARGE Research proposal}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Research proposal}
+    \begin{itemize}
+        \item Low-pause on-the-fly GC as a baseline
+        \item Optional annotations to hint at desired memory
+              management for performance critical sections of code.
+        \item Effectively "programmable" garbage collection.
+    \end{itemize}
+\end{frame}
