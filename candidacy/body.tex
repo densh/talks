@@ -517,19 +517,19 @@
 \end{frame}
 
 \begin{frame}
-    \frametitle{Summary}
-    \Large
+    \frametitle{State of memory management}
     \definecolor{alizarin}{rgb}{0.82, 0.1, 0.26}
     \definecolor{seagreen}{rgb}{0.18, 0.55, 0.34}
     \newcommand{\Best}{{\color{seagreen} Good}}
     \newcommand{\Worst}{{\color{alizarin} Bad}}
     \begin{center}
-        \begin{tabular}{c | c | c | c}
-                                   & Regions & Ownership & GC     \\
+        \begin{tabular}{c | c | c | c | c}
+                                   & Manual & Regions & Ownership & GC     \\
                                    \hline
-            Performance            & \Best   & \Best     & \Worst \\
-            Predictability         & \Best   & \Best     & \Worst \\
-            Notational convenience & \Worst  & \Worst    & \Best
+            Performance            & \Best  & \Best   & \Best     & \Worst \\
+            Predictability         & \Best  & \Best   & \Best     & \Worst \\
+            Notational convenience & \Best  & \Worst  & \Worst    & \Best  \\
+            Safety                 & \Worst & \Best   & \Best     & \Best
 
         \end{tabular}
     \end{center}
