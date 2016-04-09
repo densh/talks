@@ -1,5 +1,10 @@
 # Data as code and code as data
-# in Scala
+
+Denys Shabalin, LAMP/EPFL
+
+---
+
+# <strike>Data as code and</strike> code as data
 
 Denys Shabalin, LAMP/EPFL
 
@@ -18,7 +23,6 @@ Denys Shabalin, LAMP/EPFL
 
 1. Where does the idea comes from?
 1. What about Scala?
-1. How do I use it?
 1. Why do people do it?
 
 ---
@@ -28,12 +32,6 @@ Denys Shabalin, LAMP/EPFL
 * Macros
 * Reflection
 * Language design
-
----
-
-# Not about
-
-<img src="res/native.png" height="450" width="450"/>
 
 ---
 
@@ -52,21 +50,18 @@ Denys Shabalin, LAMP/EPFL
 # S-expressions
 
 * Atoms:
-    * Numbers: 1, 2.0, 42/3
-    * Strings: "Hello, world!
+    * Numbers: 1, 2.0, ...
+    * Strings: "Hello, world!"
     * Symbols: lambda, +, -, =
     * ...
-* Lists: (a b c)
+* Lists:
+    * (a b c)
+    * [a b c]
+    * ...
 
 ---
 
-# Data as code
-
-TODO
-
----
-
-# Racket
+# Lisp
 
 Code is expressed through s-expressions:
 
@@ -77,65 +72,98 @@ Code is expressed through s-expressions:
           1
           (* n (factorial (- n 1))))))
 
-> (factorial 42)
-1405006117752879898543142606244511569936384000000000
+> (factorial 10)
+3628800
 ```
 
 ---
 
-# Quasiquotes
+## Quasiquotes
 
 ```
-> (quasiquote (factorial 42))
-'(factorial 42)
+> (quasiquote (factorial 10))
+'(factorial 10)
 
-> (let
-    ([fact42 '(factorial 42)])
-    (eval fact42))
-1405006117752879898543142606244511569936384000000000
+> (let*
+    ([fact10 (quasiquote (factorial 10))])
+    (eval fact10))
+3628800
 
-
-> TODO: unquote
-
+> (let*
+    ([n      (quasiquote 10)]
+     [fact10 (quasiquote (factorial (unquote n)])
+    fact10)
+'(factorial 10)
 ```
 
 ---
 
-# 2. What about Scala?
-
-```
-object Factorial extends App {
-  def factorial(n: Int) =
-    if (n == 0) 1
-    else n * factorial(n - 1)
-
-  println(factorial(42))
-}
+# 2. Scala? .meta!
 
 ---
 
-# 3. How?
+## .meta
+
+https://github.com/scalameta/scalameta
+
+"This project is a clean-room implementation of a metaprogramming toolkit for Scala, designed to be simple, robust and portable."
 
 ---
 
-# 4. Why?
+## .meta layers
+
+<img src="res/layers.png" height="550" />
 
 ---
 
-## 4.1 Code generation
+## .meta tokens
 
 ---
 
-## 4.2 Code transformations
+## .meta concrete syntax
 
 ---
 
-## 4.3 Code analysis
+## .meta quasiquotes
 
 ---
 
-# Summary
+## .meta semantics
+
+<img src="res/science-cat.png" />
 
 ---
 
-# Questions?
+## .meta 0.1
+
+<img src="res/meta-0_1.png" height="550" />
+
+---
+
+# 3. Use cases
+
+---
+
+## scalafmt
+
+Based on .meta, heavily uses tokens and concrete syntax.
+
+http://olafurpg.github.io/scalafmt/
+
+---
+
+## Codacy
+
+https://www.codacy.com
+
+"Get static analysis, code coverage, duplication and complexity information on each change to automate your code reviews."
+
+---
+
+## TL;DR
+
+.meta makes viewing code as data easy and fun.
+
+---
+
+## Questions?
