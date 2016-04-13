@@ -23,7 +23,7 @@ Denys Shabalin, LAMP/EPFL
 
 1. Where does the idea comes from?
 1. What about Scala?
-1. Why do people do it?
+1. What are the use cases?
 
 ---
 
@@ -167,3 +167,9 @@ https://www.codacy.com
 ---
 
 ## Questions?
+
+Follow us on twitter for updates:
+
+Eugene Burmako [@xeno-by](https://github.com/xeno-by)
+
+Denys Shabalin [@densh](https://github.com/densh)
